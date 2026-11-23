@@ -14,6 +14,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import com.cezila.truckcockpit.core.domain.model.Gear
 import com.cezila.truckcockpit.core.ui.R
 
 /**
@@ -55,4 +56,13 @@ fun GearIndicator(
             )
         }
     }
+}
+
+/** The letter or number shown in a [GearIndicator]. */
+fun Gear.shortLabel(): String = when (this) {
+    Gear.Park -> "P"
+    Gear.Reverse -> "R"
+    Gear.Neutral -> "N"
+    Gear.Drive -> "D"
+    is Gear.Manual -> number.toString()
 }

@@ -16,6 +16,9 @@ class FakeVehicleDataSource(
     override val vehicleState: StateFlow<VehicleState> = _vehicleState
     override val drivingMode: StateFlow<DrivingMode> = _drivingMode
 
+    /** How many collectors [vehicleState] has: checks that a subscription is released. */
+    val vehicleStateSubscribers: StateFlow<Int> get() = _vehicleState.subscriptionCount
+
     fun setVehicleState(state: VehicleState) {
         _vehicleState.value = state
     }
