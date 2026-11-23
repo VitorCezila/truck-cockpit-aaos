@@ -7,6 +7,8 @@ import com.cezila.truckcockpit.core.domain.model.Reading
 import com.cezila.truckcockpit.core.domain.model.VehicleState
 import com.cezila.truckcockpit.core.domain.testing.MainDispatcherRule
 import com.cezila.truckcockpit.core.domain.vehicle.FakeVehicleDataSource
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -118,5 +120,35 @@ class DashboardViewModelTest {
         viewModel.state.test {
             assertEquals(DashboardState(drivingMode = DrivingMode.Parked), awaitItem())
         }
+    }
+
+    @Test
+    fun `after the screen stops for longer than the timeout, the state goes back to the safe default`() = runTest {
+        val source = FakeVehicleDataSource(initialState = vehicle, initialDrivingMode = DrivingMode.Parked)
+        val viewModel = DashboardViewModel(source)
+
+        viewModel.state.test {
+            assertEquals(DrivingMode.Parked, awaitItem().drivingMode)
+        }
+        advanceTimeBy(DashboardViewModel.STOP_TIMEOUT_MILLIS + 1)
+        runCurrent()
+
+        assertEquals(DashboardState(), viewModel.state.value)
+        assertEquals(0, source.vehicleStateSubscribers.value)
+    }
+
+    @Test
+    fun `a short stop, like a rotation, keeps the state`() = runTest {
+        val source = FakeVehicleDataSource(initialState = vehicle, initialDrivingMode = DrivingMode.Parked)
+        val viewModel = DashboardViewModel(source)
+
+        viewModel.state.test {
+            assertEquals(DrivingMode.Parked, awaitItem().drivingMode)
+        }
+        advanceTimeBy(DashboardViewModel.STOP_TIMEOUT_MILLIS - 1)
+        runCurrent()
+
+        assertEquals(DrivingMode.Parked, viewModel.state.value.drivingMode)
+        assertEquals(Reading.Available(80), viewModel.state.value.speedKmh)
     }
 }

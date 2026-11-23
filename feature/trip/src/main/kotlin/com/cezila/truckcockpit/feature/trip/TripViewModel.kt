@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -45,14 +46,20 @@ class TripViewModel @Inject constructor(
      */
     private val uiState = MutableStateFlow(TripUiState())
 
-    private val drivingMode = vehicleDataSource.drivingMode.onEach { mode -> uiState.update { it.withDrivingMode(mode) } }
+    /**
+     * When the screen stops observing, the last mode seen is no longer known: go back to driving, so
+     * destination changes stay blocked until a fresh parked value arrives.
+     */
+    private val drivingMode = vehicleDataSource.drivingMode
+        .onEach { mode -> uiState.update { it.withDrivingMode(mode) } }
+        .onCompletion { uiState.update { it.withDrivingMode(DrivingMode.Driving) } }
 
     val state: StateFlow<TripState> = combine(
         vehicleDataSource.vehicleState,
         drivingMode,
         tripRepository.trip,
         uiState,
-    ) { vehicle, _, trip, ui ->
+    ) { vehicle, _, trip, ui -> // The mode is read from ui: drivingMode only feeds uiState.
         TripState(
             drivingMode = ui.drivingMode,
             speedKmh = vehicle.speedKmh.map { it.roundToInt() },
@@ -63,7 +70,7 @@ class TripViewModel @Inject constructor(
         ).withTrip(trip, vehicle)
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+        started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS, replayExpirationMillis = 0),
         initialValue = TripState(),
     )
 
@@ -124,8 +131,11 @@ class TripViewModel @Inject constructor(
         )
     }
 
-    private companion object {
-        /** Keeps the Car API subscriptions across configuration changes. */
+    internal companion object {
+        /**
+         * Keeps the Car API subscriptions across configuration changes. Once it runs out, the state
+         * goes back to the initial (driving) one, so a screen coming back never shows an old parked layout.
+         */
         const val STOP_TIMEOUT_MILLIS = 5_000L
     }
 }

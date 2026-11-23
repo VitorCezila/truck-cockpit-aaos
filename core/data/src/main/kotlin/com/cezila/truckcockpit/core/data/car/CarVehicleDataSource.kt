@@ -9,6 +9,7 @@ import android.car.hardware.CarPropertyValue
 import android.car.hardware.property.CarPropertyManager
 import com.cezila.truckcockpit.core.data.di.ApplicationScope
 import com.cezila.truckcockpit.core.data.di.DefaultDispatcher
+import com.cezila.truckcockpit.core.data.flow.shareLatest
 import com.cezila.truckcockpit.core.data.flow.throttleLatest
 import com.cezila.truckcockpit.core.domain.model.DrivingMode
 import com.cezila.truckcockpit.core.domain.model.Reading
@@ -21,7 +22,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -66,7 +65,7 @@ internal class CarVehicleDataSource @Inject constructor(
         }
         .distinctUntilChanged()
         .flowOn(dispatcher)
-        .shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
+        .shareLatest(scope)
 
     override val drivingMode: Flow<DrivingMode> = connection.car
         .flatMapLatest { car ->
@@ -76,7 +75,7 @@ internal class CarVehicleDataSource @Inject constructor(
         }
         .distinctUntilChanged()
         .flowOn(dispatcher)
-        .shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
+        .shareLatest(scope)
 
     private fun vehicleState(manager: CarPropertyManager): Flow<VehicleState> = combine(
         manager.floatProperty(VehiclePropertyIds.PERF_VEHICLE_SPEED, SPEED_RATE_HZ)
