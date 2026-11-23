@@ -9,26 +9,33 @@ set -euo pipefail
 STEP="${1:-2}"
 
 # VehiclePropertyIds (checked against the android.car library, SDK 37).
-PERF_VEHICLE_SPEED=0x11600207   # float, m/s
-GEAR_SELECTION=0x11400400       # int32, VehicleGear: 4 = PARK, 8 = DRIVE
-EV_BATTERY_LEVEL=0x11600309     # float, Wh. Keep below INFO_EV_BATTERY_CAPACITY (STATIC, ~150000 Wh on
-                                # the stock emulator VHAL; check yours) or the percentage clamps at 100%.
-RANGE_REMAINING=0x11600308      # float, meters
+PERF_VEHICLE_SPEED=0x11600207   # float, m/s, CONTINUOUS
+GEAR_SELECTION=0x11400400       # int32, ON_CHANGE, VehicleGear: 4 = PARK, 8 = DRIVE
+EV_BATTERY_LEVEL=0x11600309     # float, Wh, CONTINUOUS. Keep below INFO_EV_BATTERY_CAPACITY (STATIC,
+                                # 150000 Wh on the API 35 emulator) or the percentage clamps at 100%.
+RANGE_REMAINING=0x11600308      # float, meters, CONTINUOUS
 
 GEAR_PARK=4
 GEAR_DRIVE=8
 
+# ON_CHANGE properties keep an injected value.
 inject() {
-  adb shell cmd car_service inject-vhal-event "$1" "$2"
+  adb shell cmd car_service inject-vhal-event "$1" "$2" >/dev/null
+}
+
+# The emulator keeps publishing its own values for CONTINUOUS properties, which overwrite a
+# one-off inject-vhal-event at once. Stream the value for the whole step instead (returns at once).
+inject_continuous() {
+  adb shell cmd car_service inject-continuous-events "$1" "$2" -s "$3" -d "$STEP" >/dev/null
 }
 
 state() {
   local speed_ms=$1 gear=$2 battery_wh=$3 range_m=$4
   echo "speed=${speed_ms} m/s gear=${gear} battery=${battery_wh} Wh range=${range_m} m"
-  inject "$PERF_VEHICLE_SPEED" "$speed_ms"
   inject "$GEAR_SELECTION" "$gear"
-  inject "$EV_BATTERY_LEVEL" "$battery_wh"
-  inject "$RANGE_REMAINING" "$range_m"
+  inject_continuous "$PERF_VEHICLE_SPEED" "$speed_ms" 10
+  inject_continuous "$EV_BATTERY_LEVEL" "$battery_wh" 1
+  inject_continuous "$RANGE_REMAINING" "$range_m" 1
   sleep "$STEP"
 }
 
