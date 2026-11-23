@@ -87,7 +87,7 @@ Always handle a property being unavailable or the permission being denied: show 
 
 Use the **Automotive (1408p landscape)** device (1408x792, 160 dpi) with an **"Android Automotive with Google APIs"** x86_64 image, API 33+. Google Play images can't `adb root`. Verified on API 35. Its VHAL battery capacity is 150000 Wh.
 
-Change vehicle data through the emulator's extended controls (car data section) or with adb (`adb root` first). The emulator keeps publishing its own values for CONTINUOUS properties (speed, battery level, range), so a one-off `inject-vhal-event` is overwritten at once: stream them with `inject-continuous-events`. ON_CHANGE properties (gear) keep an injected value.
+Change vehicle data through the emulator's extended controls (car data section) or with adb (`adb root` first). The emulator keeps publishing its own values for CONTINUOUS properties (speed, battery level, range), so a one-off `inject-vhal-event` is overwritten at once: stream them with `inject-continuous-events`. ON_CHANGE properties (gear) keep an injected value only for apps subscribed at that moment: the VHAL itself is not changed, so a fresh subscription (e.g. the app coming back from the background) reads the VHAL value again. Inject while the app is in the foreground.
 
 ```bash
 adb root
