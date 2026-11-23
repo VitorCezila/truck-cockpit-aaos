@@ -25,7 +25,7 @@ class DashboardViewModel @Inject constructor(
         DashboardState(drivingMode = drivingMode).withVehicle(vehicle)
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+        started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS, replayExpirationMillis = 0),
         initialValue = DashboardState(),
     )
 
@@ -35,8 +35,11 @@ class DashboardViewModel @Inject constructor(
     @Suppress("UNUSED_PARAMETER") // No intents yet; this stays the single entry point.
     fun onIntent(intent: DashboardIntent) = Unit
 
-    private companion object {
-        /** Keeps the Car API subscriptions across configuration changes. */
+    internal companion object {
+        /**
+         * Keeps the Car API subscriptions across configuration changes. Once it runs out, the state
+         * goes back to the initial (driving) one, so a screen coming back never shows an old parked layout.
+         */
         const val STOP_TIMEOUT_MILLIS = 5_000L
     }
 }

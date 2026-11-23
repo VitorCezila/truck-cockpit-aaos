@@ -14,6 +14,8 @@ import com.cezila.truckcockpit.core.domain.usecase.CalculateEnergyPerKmUseCase
 import com.cezila.truckcockpit.core.domain.usecase.CheckDestinationReachableUseCase
 import com.cezila.truckcockpit.core.domain.usecase.EstimateTimeToArrivalUseCase
 import com.cezila.truckcockpit.core.domain.vehicle.FakeVehicleDataSource
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -228,6 +230,50 @@ class TripViewModelTest {
             assertEquals(DestinationStatus.Unknown, state.destinationStatus)
             // Distance comes from the trip, so it still shows.
             assertEquals(Reading.Available(46), state.remainingKm)
+        }
+    }
+
+    @Test
+    fun `after the screen stops for longer than the timeout, destination changes are blocked again`() = runTest {
+        trips.setTrip(tripToCampinas)
+        val viewModel = viewModel()
+
+        viewModel.state.test {
+            assertEquals(DrivingMode.Parked, awaitItem().drivingMode)
+        }
+        advanceTimeBy(TripViewModel.STOP_TIMEOUT_MILLIS + 1)
+        runCurrent()
+
+        assertEquals(TripState(), viewModel.state.value)
+        viewModel.onIntent(TripIntent.DestinationSelected(curitiba))
+        assertEquals(tripToCampinas, trips.trip.value)
+
+        // A fresh parked value after resuming unblocks them.
+        viewModel.state.test {
+            assertEquals(DrivingMode.Parked, awaitItem().drivingMode)
+            viewModel.onIntent(TripIntent.DestinationSelected(curitiba))
+            assertEquals(curitiba, trips.trip.value?.destination)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `a short stop, like a rotation, keeps the parked state and the open picker`() = runTest {
+        trips.setTrip(tripToCampinas)
+        val viewModel = viewModel()
+
+        viewModel.state.test {
+            awaitItem()
+            viewModel.onIntent(TripIntent.ChangeDestinationClicked)
+            assertTrue(awaitItem().showsDestinationPicker)
+        }
+        advanceTimeBy(TripViewModel.STOP_TIMEOUT_MILLIS - 1)
+        runCurrent()
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertEquals(DrivingMode.Parked, state.drivingMode)
+            assertTrue(state.showsDestinationPicker)
         }
     }
 }
