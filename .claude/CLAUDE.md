@@ -42,8 +42,8 @@ Use the latest stable versions; confirm them before adding a dependency. Keep ve
 | Module | Package | Contents |
 |---|---|---|
 | `:app` | `com.cezila.truckcockpit` | Activity, NavHost, Hilt wiring, manifest (automotive feature, permissions, `distractionOptimized`) |
-| `:core:domain` | `com.cezila.truckcockpit.core.domain` | Models (`VehicleState`, `Gear`, `DrivingMode`), `VehicleDataSource` interface, use cases (e.g. `EstimateRangeUseCase`, `CheckDestinationReachableUseCase`) |
-| `:core:data` | `com.cezila.truckcockpit.core.data` | `CarVehicleDataSource` (Car API), `FakeVehicleDataSource` (tests and previews), mappers |
+| `:core:domain` | `com.cezila.truckcockpit.core.domain` | Models (`VehicleState`, `Gear`, `DrivingMode`), `VehicleDataSource` interface, use cases (e.g. `EstimateRangeUseCase`, `CheckDestinationReachableUseCase`); `FakeVehicleDataSource` in `testFixtures` |
+| `:core:data` | `com.cezila.truckcockpit.core.data` | `CarVehicleDataSource` (Car API), mappers |
 | `:core:ui` | `com.cezila.truckcockpit.core.ui` | Theme, typography, shared composables (gauges, big buttons, alert banner) |
 | `:feature:dashboard` | `com.cezila.truckcockpit.feature.dashboard` | Dashboard screen, ViewModel, contract (State/Intent/Effect) |
 | `:feature:trip` | `com.cezila.truckcockpit.feature.trip` | Trip screen, ViewModel, contract |
@@ -53,9 +53,10 @@ Use the latest stable versions; confirm them before adding a dependency. Keep ve
 
 All vehicle data goes through `VehicleDataSource` in `:core:domain`. Screens and use cases never touch the Car API directly.
 
-- `CarVehicleDataSource` wraps `CarPropertyManager` and exposes `Flow<VehicleState>`.
-- `FakeVehicleDataSource` emits any state you set. Use it in unit tests, snapshot tests and Compose previews.
-- Driving mode comes from `CarUxRestrictionsManager`, exposed as `Flow<DrivingMode>`.
+- `CarVehicleDataSource` wraps `CarPropertyManager` and exposes `Flow<VehicleState>`. Each value is a `Reading<T>` (`Available` or `NotAvailable`).
+- `FakeVehicleDataSource` (in the `testFixtures` of `:core:domain`, so `:feature:*` tests can use it without depending on `:core:data`) emits any state you set. Use it in ViewModel tests; previews and snapshot tests build the screen `State` directly.
+- Driving mode comes from `CarUxRestrictionsManager`, exposed as `Flow<DrivingMode>`. Until it is known, screens assume `Driving` (the safe layout).
+- `CAR_SPEED` and `CAR_ENERGY` are dangerous permissions, requested at runtime before the first screen subscribes.
 
 Phase 1 properties (`VehiclePropertyIds`) and permissions:
 

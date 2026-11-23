@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Truck Cockpit</string>
+    <string name="waiting_for_permissions">Waiting for vehicle data permissions</string>
 </resources>
