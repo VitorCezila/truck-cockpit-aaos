@@ -1,4 +1,4 @@
-package com.cezila.truckcockpit.feature.dashboard
+package com.cezila.truckcockpit.core.domain.testing
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
