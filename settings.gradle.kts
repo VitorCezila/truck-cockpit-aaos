@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -23,4 +24,9 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Truck Cockpit"
+
 include(":app")
+include(":core:domain")
+include(":core:data")
+include(":core:ui")
+include(":feature:dashboard")
