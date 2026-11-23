@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trip_status_parked">Parked</string>
+    <string name="trip_status_driving">Driving</string>
+    <string name="trip_destination">Destination</string>
+    <string name="trip_remaining_distance">Remaining distance</string>
+    <string name="trip_time_to_arrival">Time to arrival</string>
+    <string name="trip_battery_at_arrival">Battery at arrival</string>
+    <string name="trip_average_use">Average use</string>
+    <string name="trip_change_destination">Change destination</string>
+    <string name="trip_choose_destination">Choose a destination</string>
+    <string name="trip_cancel">Cancel</string>
+    <string name="trip_destination_distance">%1$d km</string>
+    <string name="trip_below_reserve">Below reserve</string>
+    <string name="trip_reachable">Battery reaches the destination</string>
+    <string name="trip_reachable_message">%1$d%% left at arrival</string>
+    <string name="trip_unreachable">Battery won\'t reach destination</string>
+    <string name="trip_unreachable_message">%1$d km short of destination</string>
+    <string name="trip_estimating">Arrival not estimated yet</string>
+    <string name="trip_estimating_message">Needs the battery level and the first km driven</string>
+    <string name="trip_no_destination">No destination set</string>
+    <string name="trip_no_destination_driving">Choose a destination when parked</string>
+    <string name="trip_to_go">to go</string>
+    <string name="trip_energy_value">%1$.2f</string>
+    <string name="trip_duration_hours_minutes">%1$d:%2$02d</string>
+    <string name="trip_unit_kmh" translatable="false">km/h</string>
+    <string name="trip_unit_km" translatable="false">km</string>
+    <string name="trip_unit_percent" translatable="false">%</string>
+    <string name="trip_unit_kwh_per_km" translatable="false">kWh/km</string>
+    <string name="trip_unit_hours" translatable="false">h</string>
+    <string name="trip_unit_minutes" translatable="false">min</string>
+</resources>

@@ -42,11 +42,11 @@ Use the latest stable versions; confirm them before adding a dependency. Keep ve
 | Module | Package | Contents |
 |---|---|---|
 | `:app` | `com.cezila.truckcockpit` | Activity, NavHost, Hilt wiring, manifest (automotive feature, permissions, `distractionOptimized`) |
-| `:core:domain` | `com.cezila.truckcockpit.core.domain` | Models (`VehicleState`, `Gear`, `DrivingMode`), `VehicleDataSource` interface, use cases (e.g. `EstimateRangeUseCase`, `CheckDestinationReachableUseCase`); `FakeVehicleDataSource` in `testFixtures` |
-| `:core:data` | `com.cezila.truckcockpit.core.data` | `CarVehicleDataSource` (Car API), mappers |
-| `:core:ui` | `com.cezila.truckcockpit.core.ui` | Theme, typography, shared composables (gauges, big buttons, alert banner) |
+| `:core:domain` | `com.cezila.truckcockpit.core.domain` | Models (`VehicleState`, `Gear`, `DrivingMode`, `Destination`, `TripProgress`, `Reachability`), `VehicleDataSource` and `TripRepository` interfaces, use cases (e.g. `CalculateEnergyPerKmUseCase`, `CheckDestinationReachableUseCase`); `FakeVehicleDataSource`, `FakeTripRepository` and `MainDispatcherRule` in `testFixtures` |
+| `:core:data` | `com.cezila.truckcockpit.core.data` | `CarVehicleDataSource` (Car API), mappers, `TrackingTripRepository` (trip tracking in the app scope) and the simulated destinations |
+| `:core:ui` | `com.cezila.truckcockpit.core.ui` | Theme, typography, shared composables (gauges, big buttons, alert banner, tab bar) |
 | `:feature:dashboard` | `com.cezila.truckcockpit.feature.dashboard` | Dashboard screen, ViewModel, contract (State/Intent/Effect) |
-| `:feature:trip` | `com.cezila.truckcockpit.feature.trip` | Trip screen, ViewModel, contract |
+| `:feature:trip` | `com.cezila.truckcockpit.feature.trip` | Trip screen (destination picker, energy use, destination warning), ViewModel, contract |
 | `:baselineprofile` | `com.cezila.truckcockpit.baselineprofile` | Baseline Profile generator, startup benchmarks |
 
 ## Vehicle data
@@ -57,6 +57,7 @@ All vehicle data goes through `VehicleDataSource` in `:core:domain`. Screens and
 - `FakeVehicleDataSource` (in the `testFixtures` of `:core:domain`, so `:feature:*` tests can use it without depending on `:core:data`) emits any state you set. Use it in ViewModel tests; previews and snapshot tests build the screen `State` directly.
 - Driving mode comes from `CarUxRestrictionsManager`, exposed as `Flow<DrivingMode>`. Until it is known, screens assume `Driving` (the safe layout).
 - `CAR_SPEED` and `CAR_ENERGY` are dangerous permissions, requested at runtime before the first screen subscribes.
+- Trip distance comes from integrating speed (`TrackingTripRepository`, one sample per second), not from `PERF_ODOMETER`, so no `CAR_MILEAGE` is needed. Energy per km = battery energy used / distance, shown after the first km. Destinations are a fixed simulated list, picked while parked.
 
 Phase 1 properties (`VehiclePropertyIds`) and permissions:
 
@@ -98,7 +99,7 @@ adb shell cmd car_service inject-continuous-events 0x11600308 243000 -s 1 -d 30 
 
 `get-property-value` keeps showing the VHAL's own value for CONTINUOUS properties during injection; check the app, not the property. Gear D plus speed above 0 switches UX restrictions to driving.
 
-Check property IDs and units against `VehiclePropertyIds` before relying on them. `scripts/simulate-trip.sh` plays a full trip (accelerate, change gear, drain battery, stop) with these commands.
+Check property IDs and units against `VehiclePropertyIds` before relying on them. `scripts/simulate-trip.sh [step-seconds] [phase-seconds]` plays a full trip (accelerate, cruise, climb, stop) with these commands. Pick "Campinas Distribution Center" on the Trip tab while parked: the cruise shows the average use, and the climb triggers the "Battery won't reach destination" warning.
 
 The emulator has two displays, so `screencap` needs `-d <display-id>` (`adb shell dumpsys SurfaceFlinger --display-id`).
 

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import com.cezila.truckcockpit.core.ui.theme.TruckCockpitTheme
-import com.cezila.truckcockpit.feature.dashboard.DashboardRoute
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -32,7 +31,7 @@ class MainActivity : ComponentActivity() {
                         .background(MaterialTheme.colorScheme.background),
                 ) {
                     VehiclePermissionsGate {
-                        DashboardRoute()
+                        TruckCockpitApp()
                     }
                 }
             }

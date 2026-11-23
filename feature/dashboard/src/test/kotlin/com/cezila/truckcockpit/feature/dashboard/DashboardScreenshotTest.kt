@@ -39,3 +39,29 @@ class DashboardScreenshotTest {
         composeRule.onRoot().captureRoboImage()
     }
 }
+
+/**
+ * The AAOS emulator's display (1408x792 at 160 dpi), minus the 89dp tab bar (88dp + divider):
+ * the space the screen really gets on the smallest display it must fit.
+ */
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = "w1408dp-h703dp-land-mdpi")
+class DashboardSmallScreenshotTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @Test
+    fun parked() = capture(DashboardSamples.parked)
+
+    @Test
+    fun driving() = capture(DashboardSamples.driving)
+
+    private fun capture(state: DashboardState) {
+        composeRule.setContent {
+            TruckCockpitTheme { DashboardScreen(state = state, onIntent = {}) }
+        }
+        composeRule.onRoot().captureRoboImage()
+    }
+}

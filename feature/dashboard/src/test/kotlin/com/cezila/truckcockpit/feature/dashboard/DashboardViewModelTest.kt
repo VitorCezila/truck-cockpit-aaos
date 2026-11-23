@@ -5,6 +5,7 @@ import com.cezila.truckcockpit.core.domain.model.DrivingMode
 import com.cezila.truckcockpit.core.domain.model.Gear
 import com.cezila.truckcockpit.core.domain.model.Reading
 import com.cezila.truckcockpit.core.domain.model.VehicleState
+import com.cezila.truckcockpit.core.domain.testing.MainDispatcherRule
 import com.cezila.truckcockpit.core.domain.vehicle.FakeVehicleDataSource
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

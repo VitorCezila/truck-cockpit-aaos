@@ -39,6 +39,7 @@ import com.cezila.truckcockpit.core.ui.component.GearIndicator
 import com.cezila.truckcockpit.core.ui.component.MetricCard
 import com.cezila.truckcockpit.core.ui.component.StatusIndicator
 import com.cezila.truckcockpit.core.ui.component.ValueWithUnit
+import com.cezila.truckcockpit.core.ui.component.shortLabel
 import com.cezila.truckcockpit.core.ui.theme.TruckCockpitTheme
 
 /** The only composable that sees the ViewModel. */
@@ -106,7 +107,7 @@ private fun DashboardParkedContent(state: DashboardState) {
                     unitStyle = MaterialTheme.typography.headlineSmall,
                 )
                 GearIndicator(
-                    gear = state.gear.valueOrNull()?.label(),
+                    gear = state.gear.valueOrNull()?.shortLabel(),
                     filled = state.gear.valueOrNull() == Gear.Park,
                     size = 120.dp,
                     textStyle = MaterialTheme.typography.displaySmall,
@@ -170,7 +171,7 @@ private fun DashboardDrivingContent(state: DashboardState) {
                     )
                 }
                 GearIndicator(
-                    gear = state.gear.valueOrNull()?.label(),
+                    gear = state.gear.valueOrNull()?.shortLabel(),
                     filled = state.gear.valueOrNull() == Gear.Park,
                     size = 176.dp,
                     textStyle = MaterialTheme.typography.displayMedium,
@@ -240,14 +241,6 @@ private fun RangeCard(
         )
         if (fillsCell) Spacer(Modifier.weight(1f))
     }
-}
-
-private fun Gear.label(): String = when (this) {
-    Gear.Park -> "P"
-    Gear.Reverse -> "R"
-    Gear.Neutral -> "N"
-    Gear.Drive -> "D"
-    is Gear.Manual -> number.toString()
 }
 
 private val ScreenPadding = 32.dp
