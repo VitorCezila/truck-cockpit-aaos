@@ -42,8 +42,8 @@ Use the latest stable versions; confirm them before adding a dependency. Keep ve
 | Module | Package | Contents |
 |---|---|---|
 | `:app` | `com.cezila.truckcockpit` | Activity, NavHost, Hilt wiring, manifest (automotive feature, permissions, `distractionOptimized`) |
-| `:core:domain` | `com.cezila.truckcockpit.core.domain` | Models (`VehicleState`, `Gear`, `DrivingMode`), `VehicleDataSource` interface, use cases (e.g. `EstimateRangeUseCase`, `CheckDestinationReachableUseCase`) |
-| `:core:data` | `com.cezila.truckcockpit.core.data` | `CarVehicleDataSource` (Car API), `FakeVehicleDataSource` (tests and previews), mappers |
+| `:core:domain` | `com.cezila.truckcockpit.core.domain` | Models (`VehicleState`, `Gear`, `DrivingMode`), `VehicleDataSource` interface, use cases (e.g. `EstimateRangeUseCase`, `CheckDestinationReachableUseCase`); `FakeVehicleDataSource` in `testFixtures` |
+| `:core:data` | `com.cezila.truckcockpit.core.data` | `CarVehicleDataSource` (Car API), mappers |
 | `:core:ui` | `com.cezila.truckcockpit.core.ui` | Theme, typography, shared composables (gauges, big buttons, alert banner) |
 | `:feature:dashboard` | `com.cezila.truckcockpit.feature.dashboard` | Dashboard screen, ViewModel, contract (State/Intent/Effect) |
 | `:feature:trip` | `com.cezila.truckcockpit.feature.trip` | Trip screen, ViewModel, contract |
@@ -53,9 +53,10 @@ Use the latest stable versions; confirm them before adding a dependency. Keep ve
 
 All vehicle data goes through `VehicleDataSource` in `:core:domain`. Screens and use cases never touch the Car API directly.
 
-- `CarVehicleDataSource` wraps `CarPropertyManager` and exposes `Flow<VehicleState>`.
-- `FakeVehicleDataSource` emits any state you set. Use it in unit tests, snapshot tests and Compose previews.
-- Driving mode comes from `CarUxRestrictionsManager`, exposed as `Flow<DrivingMode>`.
+- `CarVehicleDataSource` wraps `CarPropertyManager` and exposes `Flow<VehicleState>`. Each value is a `Reading<T>` (`Available` or `NotAvailable`).
+- `FakeVehicleDataSource` (in the `testFixtures` of `:core:domain`, so `:feature:*` tests can use it without depending on `:core:data`) emits any state you set. Use it in ViewModel tests; previews and snapshot tests build the screen `State` directly.
+- Driving mode comes from `CarUxRestrictionsManager`, exposed as `Flow<DrivingMode>`. Until it is known, screens assume `Driving` (the safe layout).
+- `CAR_SPEED` and `CAR_ENERGY` are dangerous permissions, requested at runtime before the first screen subscribes.
 
 Phase 1 properties (`VehiclePropertyIds`) and permissions:
 
@@ -83,19 +84,23 @@ Always handle a property being unavailable or the permission being denied: show 
 
 ## Testing on the emulator
 
-Use an **Automotive** system image from the Android Studio Device Manager.
+Use the **Automotive (1408p landscape)** device (1408x792, 160 dpi) with an **"Android Automotive with Google APIs"** x86_64 image, API 33+. Google Play images can't `adb root`. Verified on API 35. Its VHAL battery capacity is 150000 Wh.
 
-Change vehicle data through the emulator's extended controls (car data section) or with adb. The `car_service` shell command may need `adb root` first:
+Change vehicle data through the emulator's extended controls (car data section) or with adb (`adb root` first). The emulator keeps publishing its own values for CONTINUOUS properties (speed, battery level, range), so a one-off `inject-vhal-event` is overwritten at once: stream them with `inject-continuous-events`. ON_CHANGE properties (gear) keep an injected value.
 
 ```bash
 adb root
-adb shell cmd car_service inject-vhal-event 0x11600207 22.2   # PERF_VEHICLE_SPEED, m/s (~80 km/h)
-adb shell cmd car_service inject-vhal-event 0x11400400 8      # GEAR_SELECTION, 8 = GEAR_DRIVE
-adb shell cmd car_service inject-vhal-event 0x11600309 45000  # EV_BATTERY_LEVEL, Wh
-adb shell cmd car_service inject-vhal-event 0x11600308 120000 # RANGE_REMAINING, meters
+adb shell cmd car_service inject-vhal-event 0x11400400 8                          # GEAR_SELECTION, 8 = GEAR_DRIVE
+adb shell cmd car_service inject-continuous-events 0x11600207 22.2 -s 10 -d 30    # PERF_VEHICLE_SPEED, m/s (~80 km/h)
+adb shell cmd car_service inject-continuous-events 0x11600309 98000 -s 1 -d 30    # EV_BATTERY_LEVEL, Wh
+adb shell cmd car_service inject-continuous-events 0x11600308 243000 -s 1 -d 30   # RANGE_REMAINING, meters
 ```
 
+`get-property-value` keeps showing the VHAL's own value for CONTINUOUS properties during injection; check the app, not the property. Gear D plus speed above 0 switches UX restrictions to driving.
+
 Check property IDs and units against `VehiclePropertyIds` before relying on them. `scripts/simulate-trip.sh` plays a full trip (accelerate, change gear, drain battery, stop) with these commands.
+
+The emulator has two displays, so `screencap` needs `-d <display-id>` (`adb shell dumpsys SurfaceFlinger --display-id`).
 
 ## Conventions
 

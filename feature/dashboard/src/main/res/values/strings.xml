@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_status_parked">Parked</string>
+    <string name="dashboard_status_driving">Driving</string>
+    <string name="dashboard_speed">Speed</string>
+    <string name="dashboard_battery">Battery</string>
+    <string name="dashboard_range">Range</string>
+    <string name="dashboard_estimated_range">Estimated range</string>
+    <string name="dashboard_battery_energy">%1$d of %2$d kWh</string>
+    <string name="dashboard_battery_energy_only">%1$d kWh</string>
+    <string name="dashboard_unit_kmh" translatable="false">km/h</string>
+    <string name="dashboard_unit_km" translatable="false">km</string>
+    <string name="dashboard_unit_percent" translatable="false">%</string>
+</resources>

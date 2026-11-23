@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.truckcockpit.jvm.library)
+    `java-test-fixtures`
 }
 
 dependencies {

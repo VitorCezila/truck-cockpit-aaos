@@ -6,6 +6,12 @@
         android:name="android.hardware.type.automotive"
         android:required="true" />
 
+    <!-- Vehicle data. CAR_SPEED and CAR_ENERGY are dangerous: requested at runtime in MainActivity. -->
+    <uses-permission android:name="android.car.permission.CAR_SPEED" />
+    <uses-permission android:name="android.car.permission.CAR_ENERGY" />
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
+    <uses-permission android:name="android.car.permission.CAR_INFO" />
+
     <application
         android:name=".TruckCockpitApplication"
         android:allowBackup="true"

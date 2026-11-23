@@ -2,6 +2,7 @@ import com.android.build.api.dsl.LibraryExtension
 import com.cezila.truckcockpit.buildlogic.lib
 import com.cezila.truckcockpit.buildlogic.libs
 import com.cezila.truckcockpit.buildlogic.pluginId
+import io.github.takahirom.roborazzi.RoborazziExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -11,6 +12,11 @@ import org.gradle.kotlin.dsl.dependencies
 class AndroidRoborazziConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply(libs.pluginId("roborazzi"))
+
+        // Recorded snapshots are checked in, so CI can verify against them.
+        extensions.configure<RoborazziExtension> {
+            outputDir.set(layout.projectDirectory.dir("src/test/snapshots"))
+        }
 
         pluginManager.withPlugin(libs.pluginId("android-library")) {
             extensions.configure<LibraryExtension> {
