@@ -8,6 +8,7 @@ import com.cezila.truckcockpit.core.domain.model.Reading
 import com.cezila.truckcockpit.core.domain.model.TripProgress
 import com.cezila.truckcockpit.core.domain.model.VehicleState
 import com.cezila.truckcockpit.core.domain.model.map
+import com.cezila.truckcockpit.core.domain.model.toReading
 import com.cezila.truckcockpit.core.domain.model.valueOrNull
 import com.cezila.truckcockpit.core.domain.trip.TripRepository
 import com.cezila.truckcockpit.core.domain.usecase.CalculateEnergyPerKmUseCase
@@ -92,7 +93,7 @@ class TripViewModel @Inject constructor(
     private fun TripState.withTrip(trip: TripProgress?, vehicle: VehicleState): TripState {
         if (trip == null) return this
         val energyPerKm = calculateEnergyPerKm(trip, vehicle.batteryEnergyKwh)
-        val reachability = checkDestinationReachable(trip.remainingKm, vehicle, energyPerKm)
+        val reachability = checkDestinationReachable(trip.remainingKm, vehicle, energyPerKm.toReading())
         return copy(
             destination = trip.destination,
             remainingKm = Reading.Available(trip.remainingKm.roundToInt()),

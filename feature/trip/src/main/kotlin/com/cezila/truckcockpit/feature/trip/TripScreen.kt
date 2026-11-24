@@ -37,7 +37,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.cezila.truckcockpit.core.domain.model.Destination
 import com.cezila.truckcockpit.core.domain.model.DrivingMode
 import com.cezila.truckcockpit.core.domain.model.Gear
-import com.cezila.truckcockpit.core.domain.model.Reading
+import com.cezila.truckcockpit.core.domain.model.TripAverage
 import com.cezila.truckcockpit.core.domain.model.valueOrNull
 import com.cezila.truckcockpit.core.ui.component.AlertBanner
 import com.cezila.truckcockpit.core.ui.component.AlertSeverity
@@ -52,6 +52,7 @@ import com.cezila.truckcockpit.core.ui.component.ValueWithUnit
 import com.cezila.truckcockpit.core.ui.component.shortLabel
 import com.cezila.truckcockpit.core.ui.theme.TruckCockpitTheme
 import com.cezila.truckcockpit.core.ui.R as CoreUiR
+import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 /** The only composable that sees the ViewModel. */
@@ -162,9 +163,24 @@ private fun TripParkedContent(state: TripState, onIntent: (TripIntent) -> Unit, 
     }
 }
 
+/**
+ * A trip average that needs more distance: says when it will show, so it is not mistaken for missing
+ * vehicle data. Same place and style as "Not available".
+ */
+@Composable
+private fun PendingValue(remainingKm: Float) {
+    Text(
+        // Rounded up: "After 1 km" with 0.3 km left, never "After 0 km".
+        text = stringResource(R.string.trip_after_distance, ceil(remainingKm).toInt().coerceAtLeast(1)),
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
 /** The unit goes under the number: "kWh/km" does not fit beside it in a half-width card at 1408dp. */
 @Composable
-private fun EnergyPerKm(energyPerKm: Reading<Float>) {
+private fun EnergyPerKm(energyPerKm: TripAverage<Float>) {
+    if (energyPerKm is TripAverage.Pending) return PendingValue(energyPerKm.remainingKm)
     val value = energyPerKm.valueOrNull()?.let { stringResource(R.string.trip_energy_value, it) }
     val unit = stringResource(R.string.trip_unit_kwh_per_km)
     if (value == null) {
@@ -406,7 +422,8 @@ private fun LabeledValue(label: String, modifier: Modifier = Modifier, value: @C
 
 /** "45 min" under an hour, "2:35 h" from an hour up. */
 @Composable
-private fun TimeToArrival(minutes: Reading<Int>) {
+private fun TimeToArrival(minutes: TripAverage<Int>) {
+    if (minutes is TripAverage.Pending) return PendingValue(minutes.remainingKm)
     val total = minutes.valueOrNull()
     ValueWithUnit(
         value = total?.let {

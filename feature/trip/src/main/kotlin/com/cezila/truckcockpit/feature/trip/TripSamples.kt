@@ -4,6 +4,7 @@ import com.cezila.truckcockpit.core.domain.model.Destination
 import com.cezila.truckcockpit.core.domain.model.DrivingMode
 import com.cezila.truckcockpit.core.domain.model.Gear
 import com.cezila.truckcockpit.core.domain.model.Reading
+import com.cezila.truckcockpit.core.domain.model.TripAverage
 
 /** States for previews and snapshot tests. */
 internal object TripSamples {
@@ -21,9 +22,9 @@ internal object TripSamples {
         rangeKm = Reading.Available(296),
         destination = destinations[2],
         remainingKm = Reading.Available(186),
-        timeToArrivalMinutes = Reading.Available(155),
+        timeToArrivalMinutes = TripAverage.Available(155),
         batteryAtArrivalPercent = Reading.Available(34),
-        energyPerKm = Reading.Available(1.18f),
+        energyPerKm = TripAverage.Available(1.18f),
         destinationStatus = DestinationStatus.Reachable,
         destinations = destinations,
     )
@@ -37,7 +38,7 @@ internal object TripSamples {
     val unreachableDriving = driving.copy(
         rangeKm = Reading.Available(158),
         batteryAtArrivalPercent = Reading.NotAvailable,
-        energyPerKm = Reading.Available(1.42f),
+        energyPerKm = TripAverage.Available(1.42f),
         destinationStatus = DestinationStatus.Unreachable(shortByKm = 28),
     )
 
@@ -50,9 +51,9 @@ internal object TripSamples {
     /** Trip just started: not enough distance for an average yet. */
     val estimatingParked = parked.copy(
         remainingKm = Reading.Available(315),
-        timeToArrivalMinutes = Reading.NotAvailable,
+        timeToArrivalMinutes = TripAverage.Pending(remainingKm = 0.6f),
         batteryAtArrivalPercent = Reading.Available(41),
-        energyPerKm = Reading.NotAvailable,
+        energyPerKm = TripAverage.Pending(remainingKm = 0.6f),
     )
 
     val pickingDestination = parked.copy(isPickingDestination = true)

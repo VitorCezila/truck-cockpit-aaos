@@ -7,7 +7,7 @@ Portfolio project: no backend, no accounts, no network. Everything runs on the h
 | | Parked | Driving |
 |---|---|---|
 | **Dashboard** | ![Dashboard while parked: speed 0 km/h, gear P, battery 33% and range 125 km](docs/screenshots/dashboard-parked.png) | ![Dashboard while driving: large speed (80 km/h), gear D and estimated range only](docs/screenshots/dashboard-driving.png) |
-| **Trip** | ![Trip screen while parked: Campinas Distribution Center picked, 96 km remaining, 8% battery at arrival, "Battery reaches the destination"](docs/screenshots/trip-parked.png) | ![Trip screen while driving: speed, gear and range in a strip, and the warning "Battery won't reach destination, 52 km short"](docs/screenshots/trip-driving.png) |
+| **Trip** | ![Trip screen while parked after the first km: Campinas Distribution Center, 92 km and 1:10 h to arrival, 9% battery at arrival, average use 0.38 kWh/km, "Battery reaches the destination"](docs/screenshots/trip-parked.png) | ![Trip screen while driving: speed, gear and range in a strip, and the warning "Battery won't reach destination, 52 km short"](docs/screenshots/trip-driving.png) |
 
 ## Features
 
