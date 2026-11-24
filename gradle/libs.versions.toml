@@ -18,6 +18,9 @@ robolectric = "4.18.1"
 roborazzi = "1.79.0"
 leakcanary = "2.14"
 javaxInject = "1"
+benchmark = "1.5.0"
+profileinstaller = "1.4.1"
+uiautomator = "2.4.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +52,9 @@ roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", versi
 roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }
 roborazzi-junit-rule = { group = "io.github.takahirom.roborazzi", name = "roborazzi-junit-rule", version.ref = "roborazzi" }
 leakcanary-android = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary" }
+androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
+androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark" }
+androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 
 # Gradle plugins used by build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -61,12 +67,14 @@ roborazzi-gradlePlugin = { group = "io.github.takahirom.roborazzi", name = "robo
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+android-test = { id = "com.android.test", version.ref = "agp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
+baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 
 # Convention plugins (build-logic)
 truckcockpit-android-application = { id = "truckcockpit.android.application" }
@@ -75,4 +83,5 @@ truckcockpit-android-compose = { id = "truckcockpit.android.compose" }
 truckcockpit-android-feature = { id = "truckcockpit.android.feature" }
 truckcockpit-android-hilt = { id = "truckcockpit.android.hilt" }
 truckcockpit-android-roborazzi = { id = "truckcockpit.android.roborazzi" }
+truckcockpit-android-test = { id = "truckcockpit.android.test" }
 truckcockpit-jvm-library = { id = "truckcockpit.jvm.library" }
