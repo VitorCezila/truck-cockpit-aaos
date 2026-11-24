@@ -65,17 +65,22 @@ On the Trip tab, pick "Campinas Distribution Center" while parked. During the cr
 
 ## Startup
 
-Cold start, time to initial display (TTID), with and without the Baseline Profile.
+Cold start, time to initial display (TTID), with and without the Baseline Profile, and with and without R8 (code shrinking, optimization and resource shrinking). The release build ships with both.
 
-| Compilation | Median | P90 | Launches |
-|---|---|---|---|
-| None (`verify`, no AOT code) | 2038.0 ms | 2204.8 ms | 15 |
-| Baseline Profile (`speed-profile`) | 1787.0 ms | 2059.8 ms | 15 |
-| **Change** | **−12.3%** | **−6.6%** | |
+| Build | Compilation | Median | P90 | Launches |
+|---|---|---|---|---|
+| R8 off | None (`verify`, no AOT code) | 850.0 ms | 899.2 ms | 15 |
+| R8 off | Baseline Profile (`speed-profile`) | 629.0 ms | 758.4 ms | 15 |
+| **R8 on** | None (`verify`, no AOT code) | 545.0 ms | 623.4 ms | 15 |
+| **R8 on** | **Baseline Profile (`speed-profile`), as released** | **454.0 ms** | **488.8 ms** | 15 |
 
-Measured on 2026-11-23 on the `Automotive_1408p_landscape` emulator (Android Automotive with Google APIs, x86_64, API 35), with a `benchmarkRelease` build (release-like, no LeakCanary). Host: AMD Ryzen 5 5500, 16 GB RAM, Windows 11. The two modes alternated in rounds of 5 launches, so emulator drift affected both. The profile was faster in all 3 rounds (round medians 1870 / 2148 / 1991 ms without, 1787 / 1909 / 1583 ms with).
+- **Baseline Profile, R8 on:** median −16.7%, P90 −21.6%. Faster in all 3 rounds (round medians 520 / 581 / 544 ms without, 438 / 457 / 456 ms with).
+- **R8, with the profile:** median −27.8% (629 → 454 ms). R8 also shrinks the APK from 27.2 MB to 1.9 MB.
+- **Both, against neither:** median −46.6% (850 → 454 ms).
 
-Emulator numbers are only useful for comparing before and after within one run: across sessions on this host, the median of the same mode ranged from about 1.0 s to 2.0 s, depending on host load. A real head unit (ARM, slower storage) would give different absolute numbers.
+Measured on 2026-11-24 on the `Automotive_1408p_landscape` emulator (Android Automotive with Google APIs, x86_64, API 35), with a `benchmarkRelease` build (release-like, no LeakCanary). Host: AMD Ryzen 5 5500, 16 GB RAM, Windows 11. Within each run, the two compilation modes alternated in rounds of 5 launches, so emulator drift affected both. The R8 off and on runs came one after the other in the same emulator session (R8 on first), not interleaved, so some host drift is in that comparison: the R8-off medians rose across its rounds (748 / 858 / 874 ms without the profile). Even so, every R8-off round was slower than every R8-on round in the same mode.
+
+Emulator numbers are only useful for comparing before and after within one run: across sessions on this host, the median of the same build and mode ranged from about 0.5 s to 2.0 s, depending on host load. A real head unit (ARM, slower storage) would give different absolute numbers.
 
 **Why a script instead of Macrobenchmark.** AAOS runs apps as the driver (user 10), while user 0 is the headless system user. Jetpack Benchmark assumes user 0. `:app:generateBaselineProfile` runs the generator but pulls its output from user 0's storage ("No baseline profile rules were generated"). Macrobenchmark fails with `SHELL-ACCESS-DENIED`, and even with that suppressed it can't write its Perfetto trace or install the profile (ProfileInstaller: `RESULT_NOT_WRITABLE`). [`scripts/baseline-profile.sh`](scripts/baseline-profile.sh) does the same work through the shell:
 

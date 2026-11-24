@@ -17,10 +17,24 @@ android {
 
     buildTypes {
         release {
+            // R8: code shrinking, optimization and resource shrinking. The libraries ship their own
+            // keep rules; the Car API is a platform library (useLibrary), so it is not in the APK.
             optimization {
-                enable = false
+                enable = true
             }
         }
+    }
+}
+
+// The Baseline Profile plugin copies release into nonMinifiedRelease (the build the generator runs
+// on) but does not turn the AGP 9 optimization block off there, and a build type setting is
+// overridden. Without this, the generated profile would list obfuscated names that match no other
+// build. Seen with androidx.baselineprofile 1.5.0 and AGP 9.5.2; CI checks it still holds, so this
+// can go once the plugin handles `optimization` itself.
+androidComponents {
+    beforeVariants(selector().withBuildType("nonMinifiedRelease")) { variant ->
+        variant.isMinifyEnabled = false
+        variant.shrinkResources = false
     }
 }
 

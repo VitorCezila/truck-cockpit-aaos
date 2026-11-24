@@ -24,8 +24,19 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       # One invocation so shared tasks (e.g. testDebugUnitTest) run only once.
-      - name: Build, unit tests, snapshot tests, lint, compile the Baseline Profile generator
-        run: ./gradlew assembleDebug test verifyRoborazziDebug lint :baselineprofile:compileNonMinifiedReleaseKotlin --continue
+      # assembleRelease runs R8, so a missing keep rule fails here instead of in the released app.
+      - name: Build, unit tests, snapshot tests, lint, release build with R8, compile the Baseline Profile generator
+        run: ./gradlew assembleDebug test verifyRoborazziDebug lint :app:assembleRelease :baselineprofile:compileNonMinifiedReleaseKotlin --continue
+
+      # The Baseline Profile generator runs on nonMinifiedRelease; if R8 ran there, the generated
+      # profile would list obfuscated names (see the beforeVariants block in app/build.gradle.kts).
+      # Without R8, AGP creates no minify task for that build type.
+      - name: Check the Baseline Profile build is not minified
+        run: |
+          if ./gradlew :app:minifyNonMinifiedReleaseWithR8 --dry-run -q > /dev/null 2>&1; then
+            echo "nonMinifiedRelease runs R8: the generated Baseline Profile would be obfuscated." >&2
+            exit 1
+          fi
 
       - name: Upload reports
         if: failure()
