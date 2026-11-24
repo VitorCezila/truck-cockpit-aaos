@@ -24,7 +24,7 @@ No backend, no accounts, no network. Everything runs on the head unit.
 - Hilt, Coroutines + Flow
 - Car API: `android.car` (`Car`, `CarPropertyManager`, `CarUxRestrictionsManager`), enabled with `useLibrary("android.car")`
 - Tests: JUnit, Turbine, Roborazzi (snapshot tests on the JVM)
-- Quality: LeakCanary (debug), Baseline Profiles + Macrobenchmark
+- Quality: LeakCanary (debug), Baseline Profiles (generated with `BaselineProfileRule`, cold start measured by `scripts/baseline-profile.sh`)
 - CI: GitHub Actions
 
 Use the latest stable versions; confirm them before adding a dependency. Keep versions in `gradle/libs.versions.toml`.
@@ -36,7 +36,7 @@ Use the latest stable versions; confirm them before adding a dependency. Keep ve
 :feature:* → :core:domain, :core:ui
 :core:data → :core:domain
 :core:ui   → :core:domain
-:baselineprofile → :app   (Baseline Profile generator + Macrobenchmark)
+:baselineprofile → :app   (Baseline Profile generator)
 ```
 
 | Module | Package | Contents |
@@ -47,7 +47,7 @@ Use the latest stable versions; confirm them before adding a dependency. Keep ve
 | `:core:ui` | `com.cezila.truckcockpit.core.ui` | Theme, typography, shared composables (gauges, big buttons, alert banner, tab bar) |
 | `:feature:dashboard` | `com.cezila.truckcockpit.feature.dashboard` | Dashboard screen, ViewModel, contract (State/Intent/Effect) |
 | `:feature:trip` | `com.cezila.truckcockpit.feature.trip` | Trip screen (destination picker, energy use, destination warning), ViewModel, contract |
-| `:baselineprofile` | `com.cezila.truckcockpit.baselineprofile` | Baseline Profile generator, startup benchmarks |
+| `:baselineprofile` | `com.cezila.truckcockpit.baselineprofile` | Baseline Profile generator (`BaselineProfileGenerator`: Dashboard → Trip → Dashboard) |
 
 ## Vehicle data
 
@@ -79,9 +79,11 @@ Always handle a property being unavailable or the permission being denied: show 
 ./gradlew verifyRoborazziDebug               # Compare snapshots with the recorded ones
 ./gradlew recordRoborazziDebug               # Re-record snapshots (only after an intended UI change)
 ./gradlew lint                               # Lint
-./gradlew :app:generateBaselineProfile       # Generate the Baseline Profile (AAOS emulator required)
-./gradlew :baselineprofile:connectedCheck    # Startup benchmarks (AAOS emulator required)
+scripts/baseline-profile.sh generate         # Generate the Baseline Profile (rooted AAOS emulator required)
+scripts/baseline-profile.sh benchmark [n]    # Cold-start TTID, n launches per mode (rooted AAOS emulator required)
 ```
+
+`:app:generateBaselineProfile` and Macrobenchmark don't work on AAOS: apps run as user 10, and Jetpack Benchmark assumes user 0 (output pulled from the wrong storage, `SHELL-ACCESS-DENIED`, ProfileInstaller can't write the profile). The script works around this; its header explains how.
 
 ## Testing on the emulator
 
