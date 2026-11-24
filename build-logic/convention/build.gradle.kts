@@ -52,6 +52,10 @@ gradlePlugin {
             id = libs.plugins.truckcockpit.android.roborazzi.get().pluginId
             implementationClass = "AndroidRoborazziConventionPlugin"
         }
+        register("androidTest") {
+            id = libs.plugins.truckcockpit.android.test.get().pluginId
+            implementationClass = "AndroidTestConventionPlugin"
+        }
         register("jvmLibrary") {
             id = libs.plugins.truckcockpit.jvm.library.get().pluginId
             implementationClass = "JvmLibraryConventionPlugin"

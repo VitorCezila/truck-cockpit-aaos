@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.truckcockpit.android.compose)
     alias(libs.plugins.truckcockpit.android.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -35,6 +36,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.profileinstaller)
+
+    baselineProfile(project(":baselineprofile"))
 
     debugImplementation(libs.leakcanary.android)
 }

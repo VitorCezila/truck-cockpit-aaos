@@ -24,8 +24,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       # One invocation so shared tasks (e.g. testDebugUnitTest) run only once.
-      - name: Build, unit tests, snapshot tests, lint
-        run: ./gradlew assembleDebug test verifyRoborazziDebug lint --continue
+      - name: Build, unit tests, snapshot tests, lint, compile the Baseline Profile generator
+        run: ./gradlew assembleDebug test verifyRoborazziDebug lint :baselineprofile:compileNonMinifiedReleaseKotlin --continue
 
       - name: Upload reports
         if: failure()
