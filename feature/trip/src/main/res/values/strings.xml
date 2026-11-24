@@ -20,6 +20,7 @@
     <string name="trip_estimating_message">Needs the battery level and the first km driven</string>
     <string name="trip_no_destination">No destination set</string>
     <string name="trip_no_destination_driving">Choose a destination when parked</string>
+    <string name="trip_after_distance">After %1$d km</string>
     <string name="trip_to_go">to go</string>
     <string name="trip_energy_value">%1$.2f</string>
     <string name="trip_duration_hours_minutes">%1$d:%2$02d</string>

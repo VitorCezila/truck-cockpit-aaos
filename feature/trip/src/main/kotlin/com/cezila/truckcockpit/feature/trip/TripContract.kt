@@ -4,6 +4,7 @@ import com.cezila.truckcockpit.core.domain.model.Destination
 import com.cezila.truckcockpit.core.domain.model.DrivingMode
 import com.cezila.truckcockpit.core.domain.model.Gear
 import com.cezila.truckcockpit.core.domain.model.Reading
+import com.cezila.truckcockpit.core.domain.model.TripAverage
 
 /** Everything the Trip screen shows, already rounded for display. */
 data class TripState(
@@ -15,10 +16,11 @@ data class TripState(
     /** Null until the driver picks one. */
     val destination: Destination? = null,
     val remainingKm: Reading<Int> = Reading.NotAvailable,
-    val timeToArrivalMinutes: Reading<Int> = Reading.NotAvailable,
+    /** Pending until the trip has covered enough distance for an average speed. */
+    val timeToArrivalMinutes: TripAverage<Int> = TripAverage.NotAvailable,
     val batteryAtArrivalPercent: Reading<Int> = Reading.NotAvailable,
-    /** Trip average, rounded to two decimals. */
-    val energyPerKm: Reading<Float> = Reading.NotAvailable,
+    /** Trip average, rounded to two decimals. Pending until enough distance since the first battery reading. */
+    val energyPerKm: TripAverage<Float> = TripAverage.NotAvailable,
     val destinationStatus: DestinationStatus = DestinationStatus.Unknown,
     /** Offered in the picker, parked only. */
     val destinations: List<Destination> = emptyList(),

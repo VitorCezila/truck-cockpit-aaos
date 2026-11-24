@@ -6,6 +6,7 @@ import com.cezila.truckcockpit.core.domain.model.DrivingMode
 import com.cezila.truckcockpit.core.domain.model.EnergyBaseline
 import com.cezila.truckcockpit.core.domain.model.Gear
 import com.cezila.truckcockpit.core.domain.model.Reading
+import com.cezila.truckcockpit.core.domain.model.TripAverage
 import com.cezila.truckcockpit.core.domain.model.TripProgress
 import com.cezila.truckcockpit.core.domain.model.VehicleState
 import com.cezila.truckcockpit.core.domain.testing.MainDispatcherRule
@@ -91,12 +92,33 @@ class TripViewModelTest {
             assertEquals(Reading.Available(296), state.rangeKm)
             assertEquals(Reading.Available(46), state.remainingKm)
             // 46 km at 75 km/h is 36.8 min, rounded up.
-            assertEquals(Reading.Available(37), state.timeToArrivalMinutes)
-            assertEquals(Reading.Available(1.2f), state.energyPerKm)
+            assertEquals(TripAverage.Available(37), state.timeToArrivalMinutes)
+            assertEquals(TripAverage.Available(1.2f), state.energyPerKm)
             // 352 - 46 * 1.2 = 296.8 kWh of 540.
             assertEquals(Reading.Available(55), state.batteryAtArrivalPercent)
             assertEquals(DestinationStatus.Reachable, state.destinationStatus)
             assertFalse(state.showsDestinationPicker)
+        }
+    }
+
+    @Test
+    fun `before the first km the averages are pending, and arrival uses the vehicle's range estimate`() = runTest {
+        trips.setTrip(
+            TripProgress(
+                destination = campinas,
+                distanceTravelledKm = 0.5f,
+                movingTime = 1.minutes,
+                energyBaseline = EnergyBaseline(batteryKwh = 352.5f, distanceKm = 0f),
+            ),
+        )
+
+        viewModel().state.test {
+            val state = awaitItem()
+            assertEquals(TripAverage.Pending(remainingKm = 0.5f), state.timeToArrivalMinutes)
+            assertEquals(TripAverage.Pending(remainingKm = 0.5f), state.energyPerKm)
+            // No trip average yet: 352 kWh over 296.4 km of range, so 95.5 km need ~113 kWh.
+            assertEquals(DestinationStatus.Reachable, state.destinationStatus)
+            assertEquals(Reading.Available(44), state.batteryAtArrivalPercent)
         }
     }
 
@@ -225,7 +247,7 @@ class TripViewModelTest {
         viewModel().state.test {
             val state = awaitItem()
             assertEquals(Reading.NotAvailable, state.speedKmh)
-            assertEquals(Reading.NotAvailable, state.energyPerKm)
+            assertEquals(TripAverage.NotAvailable, state.energyPerKm)
             assertEquals(Reading.NotAvailable, state.batteryAtArrivalPercent)
             assertEquals(DestinationStatus.Unknown, state.destinationStatus)
             // Distance comes from the trip, so it still shows.

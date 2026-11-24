@@ -74,6 +74,9 @@ class TripSmallScreenshotTest {
     fun parked() = capture(TripSamples.parked)
 
     @Test
+    fun parked_estimating() = capture(TripSamples.estimatingParked)
+
+    @Test
     fun parked_picking_destination() = capture(TripSamples.pickingDestination)
 
     @Test
